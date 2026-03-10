@@ -9,22 +9,28 @@ export default function DocumentDetailPage() {
     const { id } = useParams()
     const [doc, setDoc] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         let interval: NodeJS.Timeout
 
         const fetchDoc = async () => {
             try {
-                const res = await fetch(`${API}/api/v1/documents/${id}`)
+                const res = await fetch(`${API || ''}/api/v1/documents/${id}`)
+                if (!res.ok) throw new Error(`Status: ${res.status}`)
+                
                 const data = await res.json()
                 setDoc(data)
+                setError(null)
                 setLoading(false)
 
                 if (data.status === 'completed' || data.status === 'failed') {
                     clearInterval(interval)
                 }
-            } catch (err) {
+            } catch (err: any) {
                 console.error('Failed to fetch doc', err)
+                setError(err.message || 'Failed to connect to API')
+                setLoading(false)
             }
         }
 
@@ -34,8 +40,16 @@ export default function DocumentDetailPage() {
         return () => clearInterval(interval)
     }, [id])
 
-    if (loading) return <div>Loading document details...</div>
-    if (!doc) return <div>Document not found.</div>
+    if (loading) return <div className="card">Loading document details...</div>
+    if (error) return (
+        <div className="card" style={{ border: '1px solid #e74c3c' }}>
+            <h3 style={{ color: '#e74c3c' }}>Error</h3>
+            <p style={{ marginTop: '10px' }}>{error}</p>
+            <p style={{ marginTop: '10px', fontSize: '14px' }}>API URL: {API || 'Not Set'}</p>
+            <button onClick={() => window.location.reload()} className="btn" style={{ marginTop: '20px' }}>Retry</button>
+        </div>
+    )
+    if (!doc) return <div className="card">Document not found.</div>
 
     return (
         <div>
