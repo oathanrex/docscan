@@ -1,6 +1,8 @@
 'use client'
 import { useState } from 'react'
 
+const API = process.env.NEXT_PUBLIC_API_URL
+
 export default function UploadPage() {
     const [file, setFile] = useState<File | null>(null)
     const [status, setStatus] = useState('')
@@ -15,17 +17,19 @@ export default function UploadPage() {
         formData.append('file', file)
 
         try {
-            const res = await fetch('http://localhost:8000/api/v1/documents/upload', {
+            const res = await fetch(`${API}/api/v1/documents/upload`, {
                 method: 'POST',
                 body: formData,
             })
 
             const data = await res.json()
+
             if (res.ok) {
                 setStatus(`Uploaded successfully. Job ID: ${data.job_id}`)
             } else {
                 setStatus(`Error: ${data.detail || 'Upload failed'}`)
             }
+
         } catch (err) {
             setStatus('Network Error')
         }
@@ -44,6 +48,7 @@ export default function UploadPage() {
                             onChange={(e) => setFile(e.target.files?.[0] || null)}
                         />
                     </div>
+
                     <button type="submit" className="btn" disabled={!file}>
                         Process Document
                     </button>
