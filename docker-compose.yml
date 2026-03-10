@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+
+  redis:
+    image: redis:7-alpine
+    container_name: docscan_queue
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:15
+    container_name: docscan_db
+    environment:
+      POSTGRES_USER: docscan
+      POSTGRES_PASSWORD: docscan
+      POSTGRES_DB: docscan
+    ports:
+      - "5432:5432"
+
+  api:
+    build: ./backend
+    container_name: docscan_api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - postgres
+
+  worker:
+    build: ./backend
+    container_name: docscan_worker
+    command: celery -A workers.worker worker --loglevel=info
+    depends_on:
+      - redis
+      - postgres
