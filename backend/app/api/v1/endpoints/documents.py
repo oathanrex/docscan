@@ -25,7 +25,7 @@ async def upload_document(
         "status": "processing",
         "original_filename": file.filename
     }
- 
+
 # Existing Job Status Get
 @router.get("/")
 async def list_documents(
