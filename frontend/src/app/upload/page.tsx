@@ -1,9 +1,12 @@
 'use client'
 import { useState } from 'react'
 
+import { useRouter } from 'next/navigation'
+
 const API = process.env.NEXT_PUBLIC_API_URL
 
 export default function UploadPage() {
+    const router = useRouter()
     const [file, setFile] = useState<File | null>(null)
     const [status, setStatus] = useState('')
 
@@ -25,7 +28,8 @@ export default function UploadPage() {
             const data = await res.json()
 
             if (res.ok) {
-                setStatus(`Uploaded successfully. Job ID: ${data.job_id}`)
+                setStatus(`Uploaded successfully. Redirecting...`)
+                router.push(`/documents/${data.job_id}`)
             } else {
                 setStatus(`Error: ${data.detail || 'Upload failed'}`)
             }
