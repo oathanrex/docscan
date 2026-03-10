@@ -25,8 +25,17 @@ async def upload_document(
         "status": "processing",
         "original_filename": file.filename
     }
-
+ 
 # Existing Job Status Get
+@router.get("/")
+async def list_documents(
+    limit: int = Query(50, description="Limit results"),
+    offset: int = Query(0, description="Offset results")
+):
+    supabase = get_supabase()
+    response = supabase.table("documents").select("*").order("created_at", descending=True).limit(limit).offset(offset).execute()
+    return response.data
+
 @router.get("/{job_id}")
 async def get_document(job_id: str):
     supabase = get_supabase()
@@ -39,7 +48,12 @@ async def get_document(job_id: str):
         "job_id": job_id,
         "status": doc.get('status', 'pending'),
         "extracted_text": doc.get('extracted_text'),
-        "pdf_url": doc.get('pdf_url')
+        "pdf_url": doc.get('pdf_url'),
+        "structured_data": doc.get('structured_data'),
+        "summary": doc.get('summary'),
+        "classification": doc.get('classification'),
+        "original_filename": doc.get('original_filename'),
+        "created_at": doc.get('created_at')
     }
 
 # NEW PHASE 4 ENDPOINTS
